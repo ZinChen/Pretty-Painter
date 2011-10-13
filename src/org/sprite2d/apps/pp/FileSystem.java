@@ -9,23 +9,18 @@ public class FileSystem {
 	public static String copyFile(String from, String to) {
 		try {
 			File destFile = new File(to);
-			
+
 			if (destFile.exists()) {
 				int suffix = 1;
-				String fileName = FileSystem.getFileName(destFile.getName());
-				String fileExt = FileSystem
-						.getFileExtension(destFile.getName());
-				String filePath = destFile.getParentFile().getAbsolutePath()
-						+ "/";
+				String fileName = getFileName(destFile.getName());
+				String fileExt = getFileExtension(destFile.getName());
+				String filePath = destFile.getParentFile().getAbsolutePath() + '/';
 
-				String newFileName = filePath + fileName + "_" + suffix + "."
-						+ fileExt;
+				String newFileName = filePath + fileName + '_' + suffix + '.' + fileExt;
 				while (new File(newFileName).exists()) {
-					newFileName = filePath + fileName + "_" + suffix + "."
-							+ fileExt;
+					newFileName = filePath + fileName + '_' + suffix + '.' + fileExt;
 					suffix++;
 				}
-
 				to = newFileName;
 			}
 
@@ -44,18 +39,18 @@ public class FileSystem {
 		} catch (Exception e) {
 			return null;
 		}
-
 		return to;
 	}
 
+	/**Get file extension of the image file*/
 	public static String getFileExtension(String filename) {
-		int dotposition = filename.lastIndexOf(".");
+		int dotposition = filename.lastIndexOf('.');
 		return filename.substring(dotposition + 1, filename.length());
 	}
 
+	/**Get the name of the image file*/
 	public static String getFileName(String filename) {
-		int dotposition = filename.lastIndexOf(".");
+		int dotposition = filename.lastIndexOf('.');
 		return filename.substring(0, dotposition);
 	}
-
 }

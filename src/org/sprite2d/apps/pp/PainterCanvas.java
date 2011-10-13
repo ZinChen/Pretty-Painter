@@ -3,6 +3,8 @@ package org.sprite2d.apps.pp;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
+import org.sprite2d.apps.pp.PainterThread.State;
+
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
@@ -10,29 +12,28 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BlurMaskFilter.Blur;
 import android.graphics.Color;
 import android.graphics.Matrix;
-
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.SurfaceHolder.Callback;
+import android.view.SurfaceView;
 
 /**
  * Draw surface class
  * 
- * @author Artut Bikmullin (devolonter)
- * @version 1.0
+ * @author Arthur Bikmullin (devolonter)
+ * @version 1.17
  * 
  */
 public class PainterCanvas extends SurfaceView implements Callback {
 
 	private PainterThread mThread;
 	private Bitmap mBitmap;
-	private Bitmap mActiveBitmap;
 	private BrushPreset mPreset;
+	private State mThreadState;
 
 	private boolean mIsSetup;
-	private int countChanges;
+	private boolean mIsChanged;
 	private boolean mUndo;
 
 	public static final int BLUR_TYPE_NONE = 0;
@@ -44,46 +45,33 @@ public class PainterCanvas extends SurfaceView implements Callback {
 	public PainterCanvas(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
-		SurfaceHolder holder = this.getHolder();
+		SurfaceHolder holder = getHolder();
 		holder.addCallback(this);
 
-		this.mPreset = new BrushPreset(BrushPreset.PEN, Color.BLACK);
+		mPreset = new BrushPreset(BrushPreset.PEN, Color.BLACK);
+		mThreadState = new State();
 
-		this.setFocusable(true);
+        setFocusable(true);
 	}
 
 	public void onWindowFocusChanged(boolean hasWindowFocus) {
 		if (!hasWindowFocus) {
-			this.getThread().freeze();
+            getThread().freeze();
 		} else {
-			if (!this.isSetup()) {
-				this.getThread().activate();
+			if (!isSetup()) {
+                getThread().activate();
 			} else {
-				this.getThread().setup();
+                getThread().setup();
 			}
 		}
 	}
 
-	public void surfaceChanged(SurfaceHolder holder, int format, int width,
-			int height) {
-		if (this.mActiveBitmap == null) {
-			this.mActiveBitmap = Bitmap.createBitmap(width, height,
-					Bitmap.Config.ARGB_8888);
-			this.getThread().setActiveBitmap(this.mActiveBitmap, true);
-		} else {
-			this.getThread().setActiveBitmap(this.mActiveBitmap, false);
-		}
+	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+		if (mBitmap == null) {
+			mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
-		if (this.mUndo) {
-			this.getThread().undo();
-		}
-
-		if (this.mBitmap == null) {
-			this.mBitmap = Bitmap.createBitmap(width, height,
-					Bitmap.Config.ARGB_8888);
-
-			this.getThread().setBitmap(this.mBitmap, true);
-			Painter painter = (Painter) this.getContext();
+            getThread().setBitmap(mBitmap, true);
+			Painter painter = (Painter) getContext();
 			Bitmap bitmap = painter.getLastPicture();
 
 			if (bitmap != null) {
@@ -133,146 +121,148 @@ public class PainterCanvas extends SurfaceView implements Callback {
 								(height - bitmapHeight) / 2);
 					}
 				}
-				this.getThread().restoreBitmap(bitmap, matrix);
+                getThread().restoreBitmap(bitmap, matrix);
 			}
 		} else {
-			this.getThread().setBitmap(this.mBitmap, false);
+            getThread().setBitmap(mBitmap, false);
 		}
 
-		this.getThread().setPreset(this.mPreset);
-		if (!this.isSetup()) {
-			this.getThread().activate();
+        getThread().setPreset(mPreset);
+		if (!isSetup()) {
+            getThread().activate();
 		} else {
-			this.getThread().setup();
+            getThread().setup();
 		}
 	}
 
 	public void surfaceCreated(SurfaceHolder holder) {
-		this.getThread().on();
-		this.getThread().start();
+        getThread().on();
+        getThread().start();
 	}
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		boolean retry = true;
-		this.getThread().off();
+        getThread().off();
 		while (retry) {
 			try {
-				this.getThread().join();
+                getThread().join();
 				retry = false;
 			} catch (InterruptedException e) {
 			}
 		}
 
-		this.mThread = null;
+		mThread = null;
 	}
 
 	public boolean onTouchEvent(MotionEvent event) {
-		if (!this.getThread().isReady())
+		if (!getThread().isReady()) {
 			return false;
+		}
 
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
-			this.countChanges += 1;
-			this.getThread().drawBegin();
-			this.mUndo = false;
+			mIsChanged = true;
+            getThread().drawBegin();
+			mUndo = false;
 			break;
 		case MotionEvent.ACTION_MOVE:
-			this.getThread().draw((int) event.getX(), (int) event.getY());
+            getThread().draw((int) event.getX(), (int) event.getY());
 			break;
 		case MotionEvent.ACTION_UP:
 		case MotionEvent.ACTION_CANCEL:
-			this.getThread().drawEnd();
+            getThread().drawEnd();
 			break;
 		}
 		return true;
 	}
 
 	public PainterThread getThread() {
-		if (this.mThread == null) {
-			this.mThread = new PainterThread(this.getHolder());
+		if (mThread == null) {
+			mThread = new PainterThread(getHolder());
+			mThread.setState(mThreadState);
 		}
-		return this.mThread;
+		return mThread;
 	}
 
+	/*TODO: Make save quality changeable (possibly with a slider on a save dialogue?)*/
 	public void saveBitmap(String pictureName) throws FileNotFoundException {
-		synchronized (this.getHolder()) {
+		synchronized (getHolder()) {
 			FileOutputStream fos = new FileOutputStream(pictureName);
-			this.getThread().getBitmap().compress(CompressFormat.PNG, 100, fos);
+            getThread().getBitmap().compress(CompressFormat.PNG, 100, fos);
 		}
 	}
+
+	/*NOTE: This is commented simply because it is unused as of now. If anyone implements
+	 * JPEG save support, just uncomment this.*/
+
+	/*TODO: Make save quality changeable (possibly with a slider on a save dialogue?)*/
+	/*public void saveBitmapAsJPEG(String pictureName) throws FileNotFoundException {
+		synchronized (getHolder()) {
+			FileOutputStream fos = new FileOutputStream(pictureName);
+			getThread().getBitmap().compress(CompressFormat.JPEG, 100, fos);
+		}
+	}*/
 
 	public BrushPreset getCurrentPreset() {
-		return this.mPreset;
+		return mPreset;
 	}
 
 	public void setPresetColor(int color) {
-		this.mPreset.setColor(color);
-		this.getThread().setPreset(this.mPreset);
+		mPreset.setColor(color);
+        getThread().setPreset(mPreset);
 	}
 
 	public void setPresetSize(float size) {
-		this.mPreset.setSize(size);
-		this.getThread().setPreset(this.mPreset);
+		mPreset.setSize(size);
+        getThread().setPreset(mPreset);
 	}
 
 	public void setPresetBlur(Blur blurStyle, int blurRadius) {
-		this.mPreset.setBlur(blurStyle, blurRadius);
-		this.getThread().setPreset(this.mPreset);
+		mPreset.setBlur(blurStyle, blurRadius);
+        getThread().setPreset(mPreset);
 	}
 
 	public void setPresetBlur(int blurStyle, int blurRadius) {
-		this.mPreset.setBlur(blurStyle, blurRadius);
-		this.getThread().setPreset(this.mPreset);
+		mPreset.setBlur(blurStyle, blurRadius);
+        getThread().setPreset(mPreset);
 	}
 
 	public void setPreset(BrushPreset preset) {
-		this.mPreset = preset;
-		this.getThread().setPreset(this.mPreset);
+		mPreset = preset;
+        getThread().setPreset(mPreset);
 	}
 
 	public boolean isSetup() {
-		return this.mIsSetup;
+		return mIsSetup;
 	}
 
 	public void setup(boolean setup) {
-		this.mIsSetup = setup;
+		mIsSetup = setup;
 	}
 
 	public boolean isChanged() {
-		return (this.countChanges > 0);
+		return mIsChanged;
 	}
 
 	public void changed(boolean changed) {
-		if (!changed) {
-			this.countChanges = 0;
-		} else {
-			this.countChanges += 1;
-		}
+		mIsChanged = changed;
 	}
 
 	public void undo() {
-		if (!this.mUndo) {
-			this.mUndo = true;
-			this.getThread().undo();
-			this.countChanges -= 1;
+		if (!mUndo) {
+			mUndo = true;
+            getThread().undo();
 		} else {
-			this.mUndo = false;
-			this.getThread().redo();
-			this.countChanges += 1;
+			mUndo = false;
+            getThread().redo();
 		}
 	}
 
 	public boolean canUndo() {
-		if (this.isChanged() && !this.mUndo) {
-			return true;
-		}
-		return false;
-	}
+        return isChanged() && !mUndo;
+    }
 
 	public boolean canRedo() {
-		if (this.mUndo) {
-			return true;
-		}
-		return false;
-	}
+        return isChanged() && mUndo;
+    }
 }

@@ -4,12 +4,13 @@ import android.content.pm.ActivityInfo;
 
 /**
  * Application settings class
- * 
- * @author Artut Bikmullin (devolonter)
- * @version 1.0 
+ *
+ * @author Arthur Bikmullin (devolonter)
+ * @version 1.17
  *
  */
-public class PainterSettings {	
+
+public class PainterSettings {
 	public BrushPreset preset = null;
 	public String lastPicture = null;
 	public boolean forceOpenFile = false;

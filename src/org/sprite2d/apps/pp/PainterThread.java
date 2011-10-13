@@ -1,19 +1,22 @@
 package org.sprite2d.apps.pp;
 
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+
 import android.graphics.Bitmap;
 import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Cap;
-import android.graphics.Matrix;
 import android.view.SurfaceHolder;
 
 /**
  * Base draw logic 
  * 
- * @author Artut Bikmullin (devolonter)
- * @version 1.0 
+ * @author Arthur Bikmullin (devolonter)
+ * @version 1.17
  *
  */
 public class PainterThread extends Thread {
@@ -63,28 +66,24 @@ public class PainterThread extends Thread {
 	/**
 	 * Canvas object for drawing bitmap
 	 */
-	private Canvas mCanvas;
-	
-	private Canvas mActiveCanvas;
-	
+	private Canvas mCanvas;	
+
 	/**
 	 * Bitmap for drawing
 	 */
-	private Bitmap mBitmap;
-	
-	private Bitmap mActiveBitmap;
+	private Bitmap mBitmap;	
 	
 	/**
 	 * True if application is running
 	 */
-	private boolean mIsActive;
-	
-	private boolean mUndo;
+	private boolean mIsActive;	
 	
 	/**
 	 * Status of the running application
 	 */
 	private int mStatus;
+	
+	private State mState;
 	
 	/**
 	 * 
@@ -94,59 +93,54 @@ public class PainterThread extends Thread {
 	 */
 	public PainterThread(SurfaceHolder surfaceHolder) {
 		//base data
-		this.mHolder = surfaceHolder;
+		mHolder = surfaceHolder;
 	
 		//defaults brush settings
-		this.mBrushSize = 2;
-		this.mBrush = new Paint();
-		this.mBrush.setAntiAlias(true);
-		this.mBrush.setColor(Color.rgb(0, 0, 0));
-		this.mBrush.setStrokeWidth(this.mBrushSize);
-		this.mBrush.setStrokeCap(Cap.ROUND);
+		mBrushSize = 2;
+		mBrush = new Paint();
+		mBrush.setAntiAlias(true);
+		mBrush.setColor(Color.rgb(0, 0, 0));
+		mBrush.setStrokeWidth(mBrushSize);
+		mBrush.setStrokeCap(Cap.ROUND);
 		
 		//default canvas settings
-		this.mCanvasBgColor = Color.WHITE;		
-		
+		mCanvasBgColor = Color.WHITE;
+
 		//set negative coordinates for reset last point
-		this.mLastBrushPointX = -1;
-		this.mLastBrushPointY = -1;		
+		mLastBrushPointX = -1;
+		mLastBrushPointY = -1;	
 	}	
 	
 	@Override
 	public void run() {
-		this.waitForBitmap();
+        waitForBitmap();
 		
-        while (this.isRun()) {
-        	Canvas c = null;
+        while (isRun()) {
+        	Canvas canvas = null;
             try {
-                c = this.mHolder.lockCanvas();
-                synchronized (this.mHolder) {               	
-                	switch(this.mStatus) {
+                canvas = mHolder.lockCanvas();
+                synchronized (mHolder) {               	
+                	switch(mStatus) {
                 		case PainterThread.READY: {
-                			c.drawBitmap(this.mBitmap, 0, 0, null);
-                			if(!this.mUndo){
-                				c.drawBitmap(this.mActiveBitmap, 0, 0, null);
-                			}
-                			break;
+                			canvas.drawBitmap(mBitmap, 0, 0, null);
+							break;
                 		}
-                		case PainterThread.SETUP: {
-                			c.drawColor(this.mCanvasBgColor);
-                			c.drawLine(
+                		case SETUP: {
+                			canvas.drawColor(mCanvasBgColor);
+                			canvas.drawLine(
                     				50, 
-                    				(this.mBitmap.getHeight()/100)*35, 
-                    				this.mBitmap.getWidth() - 50, 
-                    				(this.mBitmap.getHeight()/100)*35, 
-                    				this.mBrush
-                    		);
+                    				(mBitmap.getHeight()/100)*35, 
+                    				mBitmap.getWidth() - 50, 
+                    				(mBitmap.getHeight()/100)*35, mBrush);
                 			break;
                 		}
                 	}                   	
                 }
             } finally {
-                if (c != null) {
-                    this.mHolder.unlockCanvasAndPost(c);
+                if (canvas != null) {
+                    mHolder.unlockCanvasAndPost(canvas);
                 }
-                if(this.isFreeze()) {
+                if(isFreeze()) {
                 	try {
     					Thread.sleep(100);
     				} catch (InterruptedException e) {}
@@ -156,154 +150,173 @@ public class PainterThread extends Thread {
     }	
 	
 	public void setPreset(BrushPreset preset) {
-		this.mBrush.setColor(preset.color);
-		this.mBrushSize = preset.size;
-		this.mBrush.setStrokeWidth(preset.size);
+		mBrush.setColor(preset.color);
+		mBrushSize = preset.size;
+		mBrush.setStrokeWidth(preset.size);
 		if(preset.blurStyle != null && preset.blurRadius > 0){
-			this.mBrush.setMaskFilter(new BlurMaskFilter(preset.blurRadius, preset.blurStyle));
+			mBrush.setMaskFilter(new BlurMaskFilter(preset.blurRadius, preset.blurStyle));
 		}
 		else {
-			this.mBrush.setMaskFilter(null);
+			mBrush.setMaskFilter(null);
 		}
 	}	
 	
 	public void drawBegin() {
-		this.mLastBrushPointX = -1;
-		this.mLastBrushPointY = -1;
-		PainterThread.this.completeDraw();		
-	}
-	
-	public void completeDraw() {	
-		synchronized (this.mHolder) { 
-		    if(!this.mUndo) {
-				this.mCanvas.drawBitmap(
-						 this.mActiveBitmap, 0, 0, null);			
-			}
-			this.mActiveBitmap.eraseColor(Color.TRANSPARENT);
-			this.redo();
+		mLastBrushPointX = -1;
+		mLastBrushPointY = -1;
+		
+		if (mState.redoBuffer != null && !mState.isUndo) {
+			mState.undoBuffer = mState.redoBuffer;
 		}
+		
+		mState.isUndo = false;
 	}
 	
 	public void drawEnd() {
-		this.mLastBrushPointX = -1;
-		this.mLastBrushPointY = -1;	
+		mState.redoBuffer = saveBuffer();
+		
+		mLastBrushPointX = -1;
+		mLastBrushPointY = -1;
 	}
 	
-	public boolean draw(int x, int y) {	
-		if(this.mLastBrushPointX > 0){			
-			if(this.mLastBrushPointX - x == 0 && this.mLastBrushPointY - y == 0) {
-				return false;
+	public void draw(int x, int y) {
+		if(mLastBrushPointX > 0){
+			if(mLastBrushPointX - x == 0 && mLastBrushPointY - y == 0) {
+                return;
 			}
-			
-			this.mActiveCanvas.drawLine(
+
+			mCanvas.drawLine(
 					x, 
 					y, 
-					this.mLastBrushPointX, 
-					this.mLastBrushPointY,
-					this.mBrush
+					mLastBrushPointX, 
+					mLastBrushPointY,
+					mBrush
 			);
 		}
 		else {
-			this.mActiveCanvas.drawCircle(
+			mCanvas.drawCircle(
 					x, 
 					y, 
-					this.mBrushSize*.5f, 
-					this.mBrush
+					mBrushSize*.5f, 
+					mBrush
 			);
 		}
 		
-		this.mLastBrushPointX = x;
-		this.mLastBrushPointY = y;	
-		return true;
-	}
-	
+		mLastBrushPointX = x;
+		mLastBrushPointY = y;
+    }
+
 	public void setBitmap(Bitmap bitmap, boolean clear) {
-		this.mBitmap = bitmap;
+		mBitmap = bitmap;
 		if(clear){
-			this.mBitmap.eraseColor(this.mCanvasBgColor);
-		}	
-		
-		this.mCanvas = new Canvas(this.mBitmap);
-	}
-	
-	public void setActiveBitmap(Bitmap bitmap, boolean clear) {
-		this.mActiveBitmap = bitmap;
-		if(clear){
-			this.mActiveBitmap.eraseColor(Color.TRANSPARENT);
+			mBitmap.eraseColor(mCanvasBgColor);
 		}
-		
-		this.mActiveCanvas = new Canvas(this.mActiveBitmap);
+	
+		mCanvas = new Canvas(mBitmap);
 	}
 	
 	public void restoreBitmap(Bitmap bitmap, Matrix matrix) {
-		this.mCanvas.drawBitmap(bitmap, matrix, new Paint(Paint.FILTER_BITMAP_FLAG));
+		mCanvas.drawBitmap(bitmap, matrix, new Paint(Paint.FILTER_BITMAP_FLAG));
+		mState.undoBuffer = saveBuffer();
 	}
 	
 	public void clearBitmap() {
-		this.mBitmap.eraseColor(this.mCanvasBgColor);
-		this.mActiveBitmap.eraseColor(Color.TRANSPARENT);
+		mBitmap.eraseColor(mCanvasBgColor);
+		mState.undoBuffer = null;
+		mState.redoBuffer = null;
 	}
 	
 	public Bitmap getBitmap() {
-		this.completeDraw();
-		return this.mBitmap;
+		return mBitmap;
 	}
-	
+
 	public void on() {
-		this.mIsActive = true;
+		mIsActive = true;
 	}
 	
 	public void off() {
-		this.mIsActive = false;
+		mIsActive = false;
 	}
 	
 	public void freeze() {
-		this.mStatus = PainterThread.SLEEP;
+		mStatus = SLEEP;
 	}
 	
 	public void activate() {
-		this.mStatus = PainterThread.READY;
+		mStatus = READY;
 	}
 	
 	public void setup() {
-		this.mStatus = PainterThread.SETUP;
+		mStatus = SETUP;
 	}
 	
 	public boolean isFreeze() {
-		return (this.mStatus == PainterThread.SLEEP);
+		return (mStatus == SLEEP);
 	}
 	
 	public boolean isSetup() {
-		return (this.mStatus == PainterThread.SETUP);
+		return (mStatus == SETUP);
 	}
 	
 	public boolean isReady() {
-		return (this.mStatus == PainterThread.READY);
+		return (mStatus == READY);
 	}
 	
 	public boolean isRun() {
-		return this.mIsActive;
+		return mIsActive;
 	}
 	
 	public void undo() {
-		this.mUndo = true;
+		if (mState.undoBuffer == null) {
+			mBitmap.eraseColor(mCanvasBgColor);
+		} else {
+			restoreBuffer(mState.undoBuffer);	
+		}
+		
+		mState.isUndo = true;
 	}
 	
 	public void redo() {
-		this.mUndo = false;
+		if (mState.redoBuffer != null) {
+			restoreBuffer(mState.redoBuffer);
+		}
+		
+		mState.isUndo = false;
 	}
 	
 	public int getBackgroundColor() {
-		return this.mCanvasBgColor;
+		return mCanvasBgColor;
+	}
+	
+	public void setState(State state) {
+		this.mState = state;
 	}
 	
 	private void waitForBitmap() {
-		while (this.mBitmap == null || this.mActiveBitmap == null) {
+		while (mBitmap == null) {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private byte[] saveBuffer() {
+		byte[] buffer = new byte[mBitmap.getRowBytes() * mBitmap.getHeight()];		
+		Buffer byteBuffer = ByteBuffer.wrap(buffer);
+		mBitmap.copyPixelsToBuffer(byteBuffer);	
+		return buffer;
+	}
+
+	private void restoreBuffer(byte[] buffer) {
+		Buffer byteBuffer = ByteBuffer.wrap(buffer);
+		mBitmap.copyPixelsFromBuffer(byteBuffer);
+	}
+	
+	public static class State {
+		public byte[] undoBuffer = null;
+		public byte[] redoBuffer = null;
+		public boolean isUndo = false;
 	}
 }

@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 
+
 public class ColorPickerDialog extends Dialog {
 
 	public interface OnColorChangedListener {
@@ -47,7 +48,7 @@ public class ColorPickerDialog extends Dialog {
 
 		private Paint mGradientPaint;
 		private int[] mLinearColors;
-	
+
 		ColorPickerView(Context c, OnColorChangedListener l, int color) {
 			super(c);
 			mListener = l;
@@ -85,8 +86,8 @@ public class ColorPickerDialog extends Dialog {
 			return new int[] { Color.BLACK, color, Color.WHITE };
 		}
 
-		private boolean mTrackingCenter;
 		private boolean mHighlightCenter;
+		private boolean mTrackingCenter;
 		private boolean mTrackingLinGradient;
 
 		@Override
@@ -94,7 +95,7 @@ public class ColorPickerDialog extends Dialog {
 			float r = COLOR_CIRCLE - mPaint.getStrokeWidth() * 0.5f;
 
 			canvas.translate(Center_X, COLOR_CIRCLE);
-			
+
 			canvas.drawOval(new RectF(-r, -r, r, r), mPaint);
 			canvas.drawCircle(0, 0, CENTER_RADIUS, mCenterPaint);
 
@@ -107,8 +108,7 @@ public class ColorPickerDialog extends Dialog {
 				} else {
 					mCenterPaint.setAlpha(0x80);
 				}
-				canvas.drawCircle(0, 0, CENTER_RADIUS
-						+ mCenterPaint.getStrokeWidth(), mCenterPaint);
+				canvas.drawCircle(0, 0, CENTER_RADIUS + mCenterPaint.getStrokeWidth(), mCenterPaint);
 
 				mCenterPaint.setStyle(Paint.Style.FILL);
 				mCenterPaint.setColor(color);
@@ -132,7 +132,7 @@ public class ColorPickerDialog extends Dialog {
 		    setMeasuredDimension(parentWidth, parentHeight);
 			Center_X = (int) Math.ceil(parentWidth*.5);
 			Center_Y = (int) Math.ceil(parentHeight*.5);*/
-			
+
 			setMeasuredDimension(Center_X * 2, Center_Y * 2 + 70);
 		}
 
@@ -142,7 +142,7 @@ public class ColorPickerDialog extends Dialog {
 		private static final int COLOR_CIRCLE = 100;
 
 		private int ave(int s, int d, float p) {
-			return s + java.lang.Math.round(p * (d - s));
+			return s + Math.round(p * (d - s));
 		}
 
 		private int interpColor(int colors[], float unit) {
@@ -241,21 +241,21 @@ public class ColorPickerDialog extends Dialog {
 				mListener.colorChanged(color);
 				dismiss();
 			}
-		};	
-		
+		};
 
-		this.setContentView(new ColorPickerView(this.getContext(), l, mInitialColor));
-		this.setTitle(R.string.color_pick);	
-		
+
+        setContentView(new ColorPickerView(getContext(), l, mInitialColor));
+        setTitle(R.string.color_pick);
+
 		/*Display display = this.getWindow().getWindowManager().getDefaultDisplay();
 		if(display.getWidth() < display.getHeight()) {
 			this.getWindow().setLayout(
-					LayoutParams.FILL_PARENT, 
+					LayoutParams.FILL_PARENT,
 					(int) Math.ceil(display.getHeight()*.7f)
 			);
 		}
 		else {
-			this.getWindow().setLayout(					
+			this.getWindow().setLayout(
 					(int) Math.ceil(display.getWidth()*.7f),
 					LayoutParams.FILL_PARENT
 			);
