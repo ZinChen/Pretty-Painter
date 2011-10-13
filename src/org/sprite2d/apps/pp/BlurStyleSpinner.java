@@ -12,7 +12,7 @@ import android.widget.Spinner;
  * @version 1.17
  *
  */
-public class BlurStyleSpinner extends Spinner {
+public final class BlurStyleSpinner extends Spinner {
 
 	public BlurStyleSpinner(Context context) {
 		super(context);

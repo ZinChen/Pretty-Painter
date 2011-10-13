@@ -55,7 +55,7 @@ import android.widget.Toast;
  * @version 1.17
  *
  */
-public class Painter extends Activity {
+public final class Painter extends Activity {
 
 	public static final int BACKUP_OPENED_ONLY_FROM_OTHER = 10;
 	public static final int BACKUP_OPENED_ALWAYS = 20;

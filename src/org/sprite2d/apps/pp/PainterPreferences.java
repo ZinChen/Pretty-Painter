@@ -13,7 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
-public class PainterPreferences extends PreferenceActivity implements
+public final class PainterPreferences extends PreferenceActivity implements
 		OnPreferenceClickListener {
 
 	private String mAboutPreferenceKey;

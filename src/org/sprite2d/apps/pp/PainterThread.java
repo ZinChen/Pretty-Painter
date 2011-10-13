@@ -19,7 +19,7 @@ import android.view.SurfaceHolder;
  * @version 1.17
  *
  */
-public class PainterThread extends Thread {
+public final class PainterThread extends Thread {
 	
 	/**
 	 * Freeze when freeze() called
