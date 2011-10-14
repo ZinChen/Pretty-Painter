@@ -7,10 +7,10 @@ import java.net.URI;
 import java.util.Locale;
 
 import org.sprite2d.apps.pp.BrushPreset;
-import org.sprite2d.apps.pp.FileSystem;
 import org.sprite2d.apps.pp.PainterCanvas;
 import org.sprite2d.apps.pp.PainterSettings;
 import org.sprite2d.apps.pp.R;
+import org.sprite2d.apps.pp.helpers.FileSystem;
 
 import android.app.Activity;
 import android.app.AlertDialog;
