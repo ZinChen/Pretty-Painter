@@ -1,4 +1,4 @@
-package org.sprite2d.apps.pp;
+package org.sprite2d.apps.pp.views;
 
 import org.sprite2d.apps.pp.activities.Main;
 
