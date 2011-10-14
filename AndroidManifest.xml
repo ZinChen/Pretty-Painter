@@ -38,5 +38,8 @@
 			android:configChanges="locale">
 		</activity>
 		
+		<activity android:name=".ColorPicker"
+			android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen" />
+		
 	</application>
 </manifest>

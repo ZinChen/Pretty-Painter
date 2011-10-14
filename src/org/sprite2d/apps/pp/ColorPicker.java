@@ -1,0 +1,96 @@
+package org.sprite2d.apps.pp;
+
+import org.sprite2d.apps.pp.colorpicker.views.ColorPanelView;
+import org.sprite2d.apps.pp.colorpicker.views.ColorPickerView;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+
+public class ColorPicker extends Activity implements View.OnClickListener {
+
+	public final static String INTENT_DATA_INITIAL_COLOR = "color";
+	public final static String RESULT_COLOR = "color";
+
+	private ColorPickerView mColorPickerView;
+	private ColorPanelView mOldColorPanel;
+	private ColorPanelView mNewColorPanel;
+
+	private Button mCancelButton;
+	private Button mOkButton;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.color_picker);
+
+		Bundle b = getIntent().getExtras();
+		int initialColor = 0xff000000;
+
+		if (b != null) {
+			initialColor = b.getInt(INTENT_DATA_INITIAL_COLOR);
+		}
+
+		setUp(initialColor);
+
+	}
+
+	private void setUp(int color) {
+		mColorPickerView = (ColorPickerView) findViewById(R.id.color_picker_view);
+		mOldColorPanel = (ColorPanelView) findViewById(R.id.old_color_panel);
+		mNewColorPanel = (ColorPanelView) findViewById(R.id.new_color_panel);
+		mOkButton = (Button) findViewById(R.id.ok_button);
+		mCancelButton = (Button) findViewById(R.id.cancel_button);
+
+		((LinearLayout) mOldColorPanel.getParent()).setPadding(
+				Math.round(mColorPickerView.getDrawingOffset()), 0,
+				Math.round(mColorPickerView.getDrawingOffset()), 0);
+
+		mColorPickerView
+				.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+
+					public void onColorChanged(int color) {
+						mNewColorPanel.setColor(color);
+					}
+
+				});
+
+		mOldColorPanel.setColor(color);
+		mColorPickerView.setColor(color, true);
+		mColorPickerView.setAlphaSliderVisible(true);
+		mColorPickerView.setSliderTrackerColor(0xffCECECE);
+		mColorPickerView.setBorderColor(0xff7E7E7E);
+		mOldColorPanel.setBorderColor(mColorPickerView.getBorderColor());
+		mNewColorPanel.setBorderColor(mColorPickerView.getBorderColor());
+
+		mOkButton.setOnClickListener(this);
+		mCancelButton.setOnClickListener(this);
+	}
+
+	public void onClick(View v) {
+
+		switch (v.getId()) {
+		case R.id.ok_button:
+
+			Intent i = new Intent();
+			i.putExtra(RESULT_COLOR, mColorPickerView.getColor());
+
+			setResult(Activity.RESULT_OK, i);
+			finish();
+
+			break;
+
+		case R.id.cancel_button:
+
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+
+			break;
+		}
+
+	}
+
+}

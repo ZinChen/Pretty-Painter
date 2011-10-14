@@ -55,7 +55,7 @@ import android.widget.Toast;
  * @version 1.17
  *
  */
-public final class Painter extends Activity {
+public final class Painter extends Activity {	
 
 	public static final int BACKUP_OPENED_ONLY_FROM_OTHER = 10;
 	public static final int BACKUP_OPENED_ALWAYS = 20;
@@ -75,6 +75,7 @@ public final class Painter extends Activity {
 	public static final int ACTION_SAVE_AND_OPEN = 5;
 
 	public static final int REQUEST_OPEN = 1;
+	private final static int REQUEST_COLOR_PICKER = 2;
 
 	private static final String SETTINGS_STORAGE = "settings";
 
@@ -482,7 +483,7 @@ public final class Painter extends Activity {
 			Intent intent) {
 		switch (requestCode) {
 		case REQUEST_OPEN:
-			if (resultCode == Activity.RESULT_OK) {
+			if (resultCode == RESULT_OK) {
 				Uri uri = intent.getData();
 				String path = "";
 
@@ -581,16 +582,21 @@ public final class Painter extends Activity {
 				}
 			}
 			break;
+			
+		case REQUEST_COLOR_PICKER:
+			if (resultCode == RESULT_OK) {
+				mCanvas.setPresetColor(intent.getIntExtra(
+	                    ColorPicker.RESULT_COLOR, 0xff000000));
+			}
+			break;
 		}
 	}
 
 	public void changeBrushColor(View v) {
-		new ColorPickerDialog(this,
-				new ColorPickerDialog.OnColorChangedListener() {
-					public void colorChanged(int color) {
-                        mCanvas.setPresetColor(color);
-					}
-				}, mCanvas.getCurrentPreset().color).show();
+		Intent i = new Intent(this, ColorPicker.class);
+        i.putExtra(ColorPicker.INTENT_DATA_INITIAL_COLOR, 
+        		mCanvas.getCurrentPreset().color);
+        startActivityForResult(i, REQUEST_COLOR_PICKER);
 	}
 
 	public Bitmap getLastPicture() {
