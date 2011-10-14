@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Locale;
 
-import org.sprite2d.apps.pp.PainterSettings;
 import org.sprite2d.apps.pp.R;
 import org.sprite2d.apps.pp.canvas.AppCanvas;
 import org.sprite2d.apps.pp.helpers.FileSystem;
+import org.sprite2d.apps.pp.helpers.Settings;
 import org.sprite2d.apps.pp.presets.BrushPreset;
 
 import android.app.Activity;
@@ -97,7 +97,7 @@ public final class Main extends Activity {
 	private LinearLayout mPropertiesBar;
 	private RelativeLayout mSettingsLayout;
 
-	private PainterSettings mSettings;
+	private Settings mSettings;
 	private boolean mIsNewFile = true;
 
 	private boolean mOpenLastFile = true;
@@ -1023,7 +1023,7 @@ public final class Main extends Activity {
 	}
 
 	private void loadSettings() {
-		mSettings = new PainterSettings();
+		mSettings = new Settings();
 		SharedPreferences settings = getSharedPreferences(
 				SETTINGS_STORAGE, Context.MODE_PRIVATE);
 

@@ -1,4 +1,4 @@
-package org.sprite2d.apps.pp;
+package org.sprite2d.apps.pp.helpers;
 
 import org.sprite2d.apps.pp.presets.BrushPreset;
 
@@ -12,7 +12,7 @@ import android.content.pm.ActivityInfo;
  *
  */
 
-public final class PainterSettings {
+public final class Settings {
 	public BrushPreset preset = null;
 	public String lastPicture = null;
 	public boolean forceOpenFile = false;
