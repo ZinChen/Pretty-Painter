@@ -1,10 +1,10 @@
-package org.sprite2d.apps.pp;
+package org.sprite2d.apps.pp.canvas;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
-import org.sprite2d.apps.pp.PainterThread.State;
 import org.sprite2d.apps.pp.activities.Main;
+import org.sprite2d.apps.pp.canvas.CanvasThread.State;
 import org.sprite2d.apps.pp.presets.BrushPreset;
 
 import android.content.Context;
@@ -27,9 +27,9 @@ import android.view.SurfaceView;
  * @version 1.17
  * 
  */
-public final class PainterCanvas extends SurfaceView implements Callback {
+public final class AppCanvas extends SurfaceView implements Callback {
 
-	private PainterThread mThread;
+	private CanvasThread mThread;
 	private Bitmap mBitmap;
 	private BrushPreset mPreset;
 	private State mThreadState;
@@ -44,7 +44,7 @@ public final class PainterCanvas extends SurfaceView implements Callback {
 	public static final int BLUR_TYPE_OUTER = 3;
 	public static final int BLUR_TYPE_SOLID = 4;
 
-	public PainterCanvas(Context context, AttributeSet attrs) {
+	public AppCanvas(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
 		SurfaceHolder holder = getHolder();
@@ -178,9 +178,9 @@ public final class PainterCanvas extends SurfaceView implements Callback {
 		return true;
 	}
 
-	public PainterThread getThread() {
+	public CanvasThread getThread() {
 		if (mThread == null) {
-			mThread = new PainterThread(getHolder());
+			mThread = new CanvasThread(getHolder());
 			mThread.setState(mThreadState);
 		}
 		return mThread;

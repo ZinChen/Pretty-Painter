@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Locale;
 
-import org.sprite2d.apps.pp.PainterCanvas;
 import org.sprite2d.apps.pp.PainterSettings;
 import org.sprite2d.apps.pp.R;
+import org.sprite2d.apps.pp.canvas.AppCanvas;
 import org.sprite2d.apps.pp.helpers.FileSystem;
 import org.sprite2d.apps.pp.presets.BrushPreset;
 
@@ -89,7 +89,7 @@ public final class Main extends Activity {
 	public static final String PICTURE_PREFIX = "picture_";
 	public static final String PICTURE_EXT = ".png";
 
-	private PainterCanvas mCanvas;
+	private AppCanvas mCanvas;
 	private SeekBar mBrushSize;
 	private SeekBar mBrushBlurRadius;
 	private Spinner mBrushBlurStyle;
@@ -191,7 +191,7 @@ public final class Main extends Activity {
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         setContentView(R.layout.main);
-		mCanvas = (PainterCanvas) findViewById(R.id.canvas);
+		mCanvas = (AppCanvas) findViewById(R.id.canvas);
 
         loadSettings();
 

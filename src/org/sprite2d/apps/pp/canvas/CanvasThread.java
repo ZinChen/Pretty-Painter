@@ -1,4 +1,4 @@
-package org.sprite2d.apps.pp;
+package org.sprite2d.apps.pp.canvas;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -21,7 +21,7 @@ import android.view.SurfaceHolder;
  * @version 1.17
  *
  */
-public final class PainterThread extends Thread {
+public final class CanvasThread extends Thread {
 	
 	/**
 	 * Freeze when freeze() called
@@ -93,7 +93,7 @@ public final class PainterThread extends Thread {
 	 * @param context
 	 * @param handler
 	 */
-	public PainterThread(SurfaceHolder surfaceHolder) {
+	public CanvasThread(SurfaceHolder surfaceHolder) {
 		//base data
 		mHolder = surfaceHolder;
 	
@@ -123,7 +123,7 @@ public final class PainterThread extends Thread {
                 canvas = mHolder.lockCanvas();
                 synchronized (mHolder) {               	
                 	switch(mStatus) {
-                		case PainterThread.READY: {
+                		case CanvasThread.READY: {
                 			canvas.drawBitmap(mBitmap, 0, 0, null);
 							break;
                 		}
