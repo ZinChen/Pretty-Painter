@@ -1,5 +1,7 @@
 package org.sprite2d.apps.pp;
 
+import org.sprite2d.apps.pp.activities.Main;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.util.AttributeSet;
@@ -28,7 +30,7 @@ public final class BlurStyleSpinner extends Spinner {
 
 	@Override
 	public void onClick(DialogInterface dialog, int which) {
-		Painter painter = (Painter) getContext();
+		Main painter = (Main) getContext();
 		painter.resetPresets();
 		super.onClick(dialog, which);
 	}

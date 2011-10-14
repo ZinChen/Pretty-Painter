@@ -1,10 +1,16 @@
-package org.sprite2d.apps.pp;
+package org.sprite2d.apps.pp.activities;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Locale;
+
+import org.sprite2d.apps.pp.BrushPreset;
+import org.sprite2d.apps.pp.FileSystem;
+import org.sprite2d.apps.pp.PainterCanvas;
+import org.sprite2d.apps.pp.PainterSettings;
+import org.sprite2d.apps.pp.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -55,7 +61,7 @@ import android.widget.Toast;
  * @version 1.17
  *
  */
-public final class Painter extends Activity {	
+public final class Main extends Activity {	
 
 	public static final int BACKUP_OPENED_ONLY_FROM_OTHER = 10;
 	public static final int BACKUP_OPENED_ALWAYS = 20;
@@ -99,7 +105,7 @@ public final class Painter extends Activity {
 	private int mVolumeButtonsShortcuts;
 
 	private class SaveTask extends AsyncTask<Void, Void, String> {
-		private ProgressDialog dialog = ProgressDialog.show(Painter.this,
+		private ProgressDialog dialog = ProgressDialog.show(Main.this,
                 getString(R.string.saving_title),
                 getString(R.string.saving_to_sd), true);
 
@@ -124,13 +130,13 @@ public final class Painter extends Activity {
 
 	private class SetWallpaperTask extends AsyncTask<Void, Void, Boolean> {
 
-		private ProgressDialog mDialog = ProgressDialog.show(Painter.this,
+		private ProgressDialog mDialog = ProgressDialog.show(Main.this,
                 getString(R.string.wallpaper_title),
                 getString(R.string.aply_wallpaper), true);
 
 		protected Boolean doInBackground(Void... none) {
 			WallpaperManager wallpaperManager = WallpaperManager
-					.getInstance(Painter.this);
+					.getInstance(Main.this);
 			Display display = getWindowManager().getDefaultDisplay();
 
 			int wallpaperWidth = display.getWidth() * 2;
@@ -169,10 +175,10 @@ public final class Painter extends Activity {
 			mDialog.hide();
 
 			if (success) {
-				Toast.makeText(Painter.this, R.string.wallpaper_setted,
+				Toast.makeText(Main.this, R.string.wallpaper_setted,
 						Toast.LENGTH_SHORT).show();
 			} else {
-				Toast.makeText(Painter.this, R.string.wallpaper_error,
+				Toast.makeText(Main.this, R.string.wallpaper_error,
 						Toast.LENGTH_SHORT).show();
 			}
 		}
@@ -666,20 +672,20 @@ public final class Painter extends Activity {
 			protected void onPostExecute(String pictureName) {
                 mIsNewFile = false;
 
-				if (taskAction == Painter.ACTION_SAVE_AND_SHARE) {
+				if (taskAction == Main.ACTION_SAVE_AND_SHARE) {
                     startShareActivity(pictureName);
 				}
 
-				if (taskAction == Painter.ACTION_SAVE_AND_OPEN) {
+				if (taskAction == Main.ACTION_SAVE_AND_OPEN) {
                     startOpenActivity();
 				}
 
 				super.onPostExecute(pictureName);
 
-				if (taskAction == Painter.ACTION_SAVE_AND_EXIT) {
+				if (taskAction == Main.ACTION_SAVE_AND_EXIT) {
                     finish();
 				}
-				if (taskAction == Painter.ACTION_SAVE_AND_ROTATE) {
+				if (taskAction == Main.ACTION_SAVE_AND_ROTATE) {
                     rotateScreen();
 				}
 			}
@@ -743,7 +749,7 @@ public final class Painter extends Activity {
 				new DialogInterface.OnClickListener() {
 
 					public void onClick(DialogInterface dialog, int which) {
-                        savePicture(Painter.ACTION_SAVE_AND_EXIT);
+                        savePicture(Main.ACTION_SAVE_AND_EXIT);
 					}
 				});
 		alert.setNegativeButton(R.string.no,
@@ -767,7 +773,7 @@ public final class Painter extends Activity {
 				new DialogInterface.OnClickListener() {
 
 					public void onClick(DialogInterface dialog, int which) {
-                        savePicture(Painter.ACTION_SAVE_AND_OPEN);
+                        savePicture(Main.ACTION_SAVE_AND_OPEN);
 					}
 				});
 		alert.setNegativeButton(R.string.no,
@@ -791,7 +797,7 @@ public final class Painter extends Activity {
 				new DialogInterface.OnClickListener() {
 
 					public void onClick(DialogInterface dialog, int which) {
-                        savePicture(Painter.ACTION_SAVE_AND_SHARE);
+                        savePicture(Main.ACTION_SAVE_AND_SHARE);
 					}
 				});
 		alert.setNegativeButton(R.string.no,
@@ -1169,7 +1175,7 @@ public final class Painter extends Activity {
 
 	private void showPreferences() {
 		Intent intent = new Intent();
-		intent.setClass(this, PainterPreferences.class);
+		intent.setClass(this, Preferences.class);
 		startActivity(intent);
 	}
 }

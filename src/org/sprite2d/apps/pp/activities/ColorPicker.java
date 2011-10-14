@@ -1,5 +1,6 @@
-package org.sprite2d.apps.pp;
+package org.sprite2d.apps.pp.activities;
 
+import org.sprite2d.apps.pp.R;
 import org.sprite2d.apps.pp.colorpicker.views.ColorPanelView;
 import org.sprite2d.apps.pp.colorpicker.views.ColorPickerView;
 

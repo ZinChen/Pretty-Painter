@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 import org.sprite2d.apps.pp.PainterThread.State;
+import org.sprite2d.apps.pp.activities.Main;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -71,7 +72,7 @@ public final class PainterCanvas extends SurfaceView implements Callback {
 			mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
             getThread().setBitmap(mBitmap, true);
-			Painter painter = (Painter) getContext();
+			Main painter = (Main) getContext();
 			Bitmap bitmap = painter.getLastPicture();
 
 			if (bitmap != null) {

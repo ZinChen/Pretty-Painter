@@ -1,4 +1,6 @@
-package org.sprite2d.apps.pp;
+package org.sprite2d.apps.pp.activities;
+
+import org.sprite2d.apps.pp.R;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -13,7 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
-public final class PainterPreferences extends PreferenceActivity implements
+public final class Preferences extends PreferenceActivity implements
 		OnPreferenceClickListener {
 
 	private String mAboutPreferenceKey;
