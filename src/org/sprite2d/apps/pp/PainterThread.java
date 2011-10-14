@@ -3,6 +3,8 @@ package org.sprite2d.apps.pp;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
+import org.sprite2d.apps.pp.presets.BrushPreset;
+
 import android.graphics.Bitmap;
 import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;

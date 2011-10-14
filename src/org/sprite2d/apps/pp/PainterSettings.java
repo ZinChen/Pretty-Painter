@@ -1,5 +1,7 @@
 package org.sprite2d.apps.pp;
 
+import org.sprite2d.apps.pp.presets.BrushPreset;
+
 import android.content.pm.ActivityInfo;
 
 /**

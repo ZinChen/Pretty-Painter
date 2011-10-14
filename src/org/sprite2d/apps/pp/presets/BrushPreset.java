@@ -1,4 +1,4 @@
-package org.sprite2d.apps.pp;
+package org.sprite2d.apps.pp.presets;
 
 import android.graphics.BlurMaskFilter.Blur;
 import android.graphics.Color;

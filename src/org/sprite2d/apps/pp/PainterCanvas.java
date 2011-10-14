@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 
 import org.sprite2d.apps.pp.PainterThread.State;
 import org.sprite2d.apps.pp.activities.Main;
+import org.sprite2d.apps.pp.presets.BrushPreset;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
