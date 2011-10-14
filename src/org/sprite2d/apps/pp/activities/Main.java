@@ -8,8 +8,8 @@ import java.util.Locale;
 
 import org.sprite2d.apps.pp.R;
 import org.sprite2d.apps.pp.canvas.AppCanvas;
+import org.sprite2d.apps.pp.config.Settings;
 import org.sprite2d.apps.pp.helpers.FileSystem;
-import org.sprite2d.apps.pp.helpers.Settings;
 import org.sprite2d.apps.pp.presets.BrushPreset;
 
 import android.app.Activity;

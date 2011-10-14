@@ -1,4 +1,4 @@
-package org.sprite2d.apps.pp.helpers;
+package org.sprite2d.apps.pp.config;
 
 import org.sprite2d.apps.pp.presets.BrushPreset;
 
