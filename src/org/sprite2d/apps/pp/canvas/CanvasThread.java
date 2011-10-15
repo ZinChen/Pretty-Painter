@@ -291,7 +291,7 @@ public final class CanvasThread extends Thread {
 	}
 	
 	public void setState(State state) {
-		this.mState = state;
+		mState = state;
 	}
 	
 	private void waitForBitmap() {
